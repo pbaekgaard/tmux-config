@@ -10,6 +10,11 @@ else
         tmuxifier load-session $name
         exit 0
     end
+    if string match -qr '^!edit\s+\S+' -- $query
+        set name (string replace -r '^!edit\s+(\S+).*' '$1' -- $query)
+        tmuxifier edit-session $name
+        exit 0
+    end
     if string match -qr '^!remove\s+\S+' -- $query
         set layout_dir $HOME/.config/tmux/layouts
         set -q TMUXIFIER_LAYOUT_PATH; and set layout_dir $TMUXIFIER_LAYOUT_PATH

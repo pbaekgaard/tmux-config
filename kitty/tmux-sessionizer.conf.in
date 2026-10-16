@@ -1,0 +1,2 @@
+# Ctrl+Space then Ctrl+F opens tmux-sessionizer in an overlay
+map ctrl+space>ctrl+f launch --type=overlay @HOME@/.local/bin/tmux-sessionizer

@@ -13,7 +13,14 @@ else
     if string match -qr '^!remove\s+\S+' -- $query
         set layout_dir $HOME/.config/tmux/layouts
         set -q TMUXIFIER_LAYOUT_PATH; and set layout_dir $TMUXIFIER_LAYOUT_PATH
-        for name in (string split ' ' -- (string replace -r '^!remove\s+' '' -- $query) | string match -rv '^$')
+        set names (string split ' ' -- (string replace -r '^!remove\s+' '' -- $query) | string match -rv '^$')
+        read -l -P "Remove layout(s) and kill session(s): $names ? [y/N] " confirm
+        if not string match -qri '^y(es)?$' -- $confirm
+            echo "aborted"
+            sleep 1
+            exit 0
+        end
+        for name in $names
             set file $layout_dir/$name.session.sh
             if test -f $file
                 rm $file

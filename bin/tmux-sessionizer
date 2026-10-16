@@ -10,6 +10,25 @@ else
         tmuxifier load-session $name
         exit 0
     end
+    if string match -qr '^!remove\s+\S+' -- $query
+        set layout_dir $HOME/.config/tmux/layouts
+        set -q TMUXIFIER_LAYOUT_PATH; and set layout_dir $TMUXIFIER_LAYOUT_PATH
+        for name in (string split ' ' -- (string replace -r '^!remove\s+' '' -- $query) | string match -rv '^$')
+            set file $layout_dir/$name.session.sh
+            if test -f $file
+                rm $file
+                echo "removed layout $name"
+            else
+                echo "no such layout: $name"
+            end
+            if tmux has-session -t "=$name" 2>/dev/null
+                tmux kill-session -t "=$name"
+                echo "killed session $name"
+            end
+        end
+        sleep 1
+        exit 0
+    end
     set selected $out[2]
 end
 

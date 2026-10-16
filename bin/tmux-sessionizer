@@ -1,0 +1,20 @@
+#!/usr/bin/env fish
+if count $argv > /dev/null
+    set selected $argv[1]
+else
+    set out (tmuxifier list-sessions | fzf --print-query)
+    set query $out[1]
+    if string match -qr '^!new\s+\S+' -- $query
+        set name (string replace -r '^!new\s+(\S+).*' '$1' -- $query)
+        tmuxifier new-session $name
+        tmuxifier load-session $name
+        exit 0
+    end
+    set selected $out[2]
+end
+
+if test -z "$selected"
+    exit 0
+end
+
+tmuxifier load-session $selected

@@ -124,6 +124,11 @@ fi
 clone_if_missing https://github.com/tmux-plugins/tpm "$TMUX_DIR/plugins/tpm"
 clone_if_missing https://github.com/jimeh/tmuxifier "$TMUX_DIR/plugins/tmuxifier"
 
+# tmuxifier reads templates from its own checkout (TMUXIFIER_TEMPLATE_PATH is ignored)
+for t in "$REPO"/config/templates/*; do
+  install_item "$t" "$TMUX_DIR/plugins/tmuxifier/templates/$(basename "$t")"
+done
+
 # Quarantine any other broken plugin checkouts so tpm can reinstall them
 while read -r name; do
   quarantine_if_broken "$TMUX_DIR/plugins/${name##*/}"

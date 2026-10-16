@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Installs tmux config, tmux-sessionizer, fish bindings, tmuxifier and tpm.
-# Files are symlinked so the repo stays the source of truth.
+# Files are copied; re-run to update.
 set -euo pipefail
 
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -8,18 +8,18 @@ TMUX_DIR="$HOME/.config/tmux"
 BIN_DIR="$HOME/.local/bin"
 FISH_CONF_D="$HOME/.config/fish/conf.d"
 
-link() {
+install_item() {
   local src="$1" dst="$2"
   mkdir -p "$(dirname "$dst")"
-  if [ -L "$dst" ] && [ "$(readlink "$dst")" = "$src" ]; then
+  if [ -e "$dst" ] && [ ! -L "$dst" ] && diff -rq "$src" "$dst" >/dev/null 2>&1; then
     return
   fi
   if [ -e "$dst" ] || [ -L "$dst" ]; then
     mv "$dst" "$dst.backup-$(date +%Y%m%d-%H%M%S)"
     echo "backed up existing $dst"
   fi
-  ln -s "$src" "$dst"
-  echo "linked $dst"
+  cp -a "$src" "$dst"
+  echo "installed $dst"
 }
 
 clone_if_missing() {
@@ -37,13 +37,13 @@ done
 
 # tmux config
 for item in tmux.conf noctalia.conf theme-colors.conf powerkit-theme.conf scripts templates layouts; do
-  link "$REPO/config/$item" "$TMUX_DIR/$item"
+  install_item "$REPO/config/$item" "$TMUX_DIR/$item"
 done
 
 # sessionizer + fish bindings
-link "$REPO/bin/tmux-sessionizer" "$BIN_DIR/tmux-sessionizer"
-link "$REPO/fish/tmux-sessionizer.fish" "$FISH_CONF_D/tmux-sessionizer.fish"
-link "$REPO/fish/tmuxifier.fish" "$FISH_CONF_D/tmuxifier.fish"
+install_item "$REPO/bin/tmux-sessionizer" "$BIN_DIR/tmux-sessionizer"
+install_item "$REPO/fish/tmux-sessionizer.fish" "$FISH_CONF_D/tmux-sessionizer.fish"
+install_item "$REPO/fish/tmuxifier.fish" "$FISH_CONF_D/tmuxifier.fish"
 
 # tpm + tmuxifier
 clone_if_missing https://github.com/tmux-plugins/tpm "$TMUX_DIR/plugins/tpm"
